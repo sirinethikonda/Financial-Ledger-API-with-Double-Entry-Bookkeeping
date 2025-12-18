@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: ledger_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ledgerdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: Siri
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3307:3306" 
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 5
+
+  app:
+    build: .
+    container_name: ledger-api
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/ledgerdb?allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: Siri
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
