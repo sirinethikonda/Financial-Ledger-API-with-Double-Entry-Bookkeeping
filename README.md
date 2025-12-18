@@ -7,15 +7,17 @@ including:
 
 * Cash deposits and transfers
 * Real-time transaction processing
- 
+* Calculated Balance Integrity
+* Immutable Audit Trail & Ledger Audibility
+
  **Index**
 
- The main purpose of the project
- Features
- Project structure
- Technical highlights
- Design Decisions (ACID & Integrity)
- Setup & Execution
+  * The main purpose of the project
+  * Features
+  * Project structure
+  * Technical highlights
+  * Design Decisions (ACID & Integrity)
+  * Setup & Execution
  
 **The main purpose of the project**
 
@@ -32,6 +34,8 @@ My goal is to highlight my ability to create complex systems with strict busines
 
 **Project structure**
 
+```
+main 
 ledger-api/
 ├── src/main/java/com/example/ledger/
 │   ├── LedgerApiApplication.java
@@ -39,7 +43,7 @@ ledger-api/
 │   ├── model/
 │   │   ├── Account.java
 │   │   ├── Transaction.java
-│   │   └── LedgerEntry.java            # IMPORTANT: Immutable record of credit/debit.
+│   │   └── LedgerEntry.java            # Immutable record of credit/debit.
 │   │
 │   ├── repository/
 │   │   ├── AccountRepository.java
@@ -68,4 +72,63 @@ ledger-api/
 │
 ├── Dockerfile
 ├── docker-compose.yml
-└── pom.xml                          
+└── pom.xml  
+
+```
+
+**Technical highlights**
+
+* Stack: Java 17, Spring Boot 3, MySQL 8, Docker.
+* Precision: Uses BigDecimal for all monetary calculations to avoid  floating-point errors common with Double.
+* Containerization: Fully containerized with a Dockerfile and docker-compose.yml for a "one-command" setup.
+* ACID Integrity: Uses Spring’s @Transactional to ensure that if one "leg" of a transfer fails, the entire transaction is rolled back, maintaining atomicity.
+
+**ScreenShots**
+
+
+**Design Decisions**
+
+Double-Entry Implementation
+For every Transfer request:
+
+* A record is created in the transactions table to document the event.
+* A Debit entry (negative amount) is added to ledger_entries for the source account.
+* A Credit entry (positive amount) is added to ledger_entries for the destination account.
+* The sum of these entries for the specific transaction ID must equal zero.
+                        
+**ACID Properties**
+
+* Atomicity: Guaranteed by @Transactional. Both ledger entries must succeed, or none will be persisted.
+* Consistency: The system ensures the ledger is always balanced and follows the rules defined in AccountType and Status enums.
+* Isolation: Uses the default RDBMS isolation level to handle concurrent transfer requests safely, preventing race conditions.
+* Durability: All records are persisted in a Docker-managed MySQL volume.
+
+**Balance Calculation & Prevention**
+
+Balance is marked as @Transient in the Account model. It is calculated via a query: SELECT SUM(amount) FROM ledger_entry WHERE account_id = :id. Negative Balance Prevention: Before any debit, the service calculates the current balance. If CurrentBalance < RequestedAmount, an InsufficientBalanceException is thrown, triggering a rollback.
+
+**Setup & Execution**
+
+*Prerequisites:
+* Docker Desktop
+
+* Maven 3.8+
+
+* Java 17 (JRE)
+
+###1. Build the Project
+* Open your terminal in the project root and run:
+
+    mvn clean package -DskipTests
+###2. Run with Docker
+ 
+    docker-compose up --build -d  
+    
+**The API will be available at http://localhost:8080/api and the database at localhost:3307**
+
+**API Testing (Postman) :**
+   A Postman collection is recommended for testing. Key endpoints include:
+     
+     POST /api/accounts: Create a new ledger account.
+     POST /api/transactions/deposit: Add funds to an account (Credit).
+     POST /api/transactions/transfer: Move funds between accounts (Debit + Credit).
