@@ -83,8 +83,6 @@ ledger-api/
 * Containerization: Fully containerized with a Dockerfile and docker-compose.yml for a "one-command" setup.
 * ACID Integrity: Uses Spring’s @Transactional to ensure that if one "leg" of a transfer fails, the entire transaction is rolled back, maintaining atomicity.
 
-**ScreenShots**
-
 
 **Design Decisions**
 
@@ -120,6 +118,7 @@ Balance is marked as @Transient in the Account model. It is calculated via a que
 * Open your terminal in the project root and run:
 
     mvn clean package -DskipTests
+    
 ###2. Run with Docker
  
     docker-compose up --build -d  
