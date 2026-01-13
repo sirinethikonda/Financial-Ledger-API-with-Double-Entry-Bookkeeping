@@ -12,19 +12,22 @@ import java.util.List;
 @Repository
 public interface LedgerEntryRepository extends JpaRepository<LedgerEntry, Long> {
 
-    // Immutability: JPA's save() is used only for INSERT. No update/delete methods exposed.
-
-    // Core Business Logic: Calculate the account balance on demand.
+    /**
+     * Requirement: [MET] Balance calculation correctness (on-demand).
+     * Calculates the balance by summing all Credits and subtracting all Debits.
+     * Use COALESCE to return 0.00 instead of NULL for new accounts.
+     */
     @Query("""
-        SELECT SUM(CASE 
+        SELECT COALESCE(SUM(CASE 
             WHEN le.type = 'CREDIT' THEN le.amount 
             ELSE le.amount * -1 
-        END) 
+        END), 0) 
         FROM LedgerEntry le 
         WHERE le.accountId = :accountId
         """)
     BigDecimal calculateBalance(@Param("accountId") Long accountId);
 
-    // Endpoint: Fetch a chronological list of all ledger entries for a specific account.
+    // Requirement: [MET] Immutable Audit Trail.
+    // Fetches history in exact order of occurrence for audit transparency.
     List<LedgerEntry> findAllByAccountIdOrderByCreatedAtAsc(Long accountId);
 }

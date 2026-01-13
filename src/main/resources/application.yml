@@ -1,21 +1,20 @@
 spring:
   application:
     name: ledger-api
+
   datasource:
-    url: jdbc:mysql://localhost:3306/ledgerdb?serverTimezone=UTC
-    username: user # CHANGE THIS TO YOUR MYSQL USER
-    password: Siri # CHANGE THIS TO YOUR MYSQL PASSWORD
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     hibernate:
-      ddl-auto: update # Allows JPA to create/update tables
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
-        # Isolation level is typically configured on the database/session, 
-        # but Spring defaults to the database's default (often READ COMMITTED).
-        # We enforce atomicity via @Transactional and the manual balance check.
 
 server:
   port: 8080

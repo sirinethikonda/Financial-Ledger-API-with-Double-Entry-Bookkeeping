@@ -76,6 +76,46 @@ ledger-api/
 
 ```
 
+---
+
+## 📸 API Demonstration
+
+#### 1. Create Ledger Account
+Initializes a new account with a specific currency and status.  
+<img src="./screenshots/Screenshot%202026-01-13%20002550.png" width="400" alt="Create Account">  
+** Endpoint: `POST /api/accounts`**
+
+---
+
+#### 2. Cash Deposit
+Adds funds to an account by creating a Credit entry in the ledger.  
+<img src="./screenshots/Screenshot%202026-01-13%20002607.png" width="400" alt="Deposit">  
+** Endpoint: `POST /api/transactions/deposit`**
+
+---
+
+#### 3. Internal Transfer
+Moves money between accounts using atomic transactions (Debit Source + Credit Destination).  
+<img src="./screenshots/Screenshot%202026-01-13%20002707.png" width="400" alt="Transfer">  
+** Endpoint: `POST /api/transactions/transfer`**
+
+---
+
+#### 4. Withdrawal
+Debits an account after performing a thread-safe balance validation.  
+<img src="./screenshots/Screenshot%202026-01-13%20002736.png" width="400" alt="Withdrawal">  
+**Endpoint: `POST /api/transactions/withdrawal`**
+
+---
+
+#### 5. Account Balance & Audit Trail
+On-demand balance calculation and chronological list of all ledger entries for transparency.  
+<img src="./screenshots/Screenshot%202026-01-13%20002813.png" width="400" alt="Balance">  
+<img src="./screenshots/Screenshot%202026-01-13%20002759.png" width="400" alt="Audit Trail">  
+**Endpoints: `GET /api/accounts/{id}` and `GET /api/accounts/{id}/ledger-entries`**
+
+---
+
 **Technical highlights**
 
 * Stack: Java 17, Spring Boot 3, MySQL 8, Docker.
@@ -116,6 +156,7 @@ Balance is marked as @Transient in the Account model. It is calculated via a que
 
 ###1. Build the Project
 * Open your terminal in the project root and run:
+
 
     mvn clean package -DskipTests
     
